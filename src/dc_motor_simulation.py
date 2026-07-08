@@ -1,53 +1,53 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import os
 
-os.makedirs("images", exist_ok=True)
 
-# -------------------------
-# Motor Parameters
-# -------------------------
+def simulate_dc_motor(
+    target_speed=1000.0,
+    simulation_time=5.0,
+    dt=0.01,
+    time_constant=0.5,
+):
+    """
+    Simulate the speed response of a first-order DC motor.
 
-time_constant = 0.5      # seconds
-target_speed = 1000      # RPM
-simulation_time = 5      # seconds
-dt = 0.01                # time step
+    Parameters
+    ----------
+    target_speed : float
+        Desired motor speed (RPM).
 
-time = np.arange(0, simulation_time, dt)
+    simulation_time : float
+        Total simulation duration (seconds).
 
-speed = np.zeros(len(time))
+    dt : float
+        Simulation timestep (seconds).
 
-# -------------------------
-# Motor Simulation
-# -------------------------
+    time_constant : float
+        Motor time constant (seconds).
 
-for i in range(1, len(time)):
+    Returns
+    -------
+    tuple
+        (time, speed)
+    """
 
-    ds = (
-        target_speed - speed[i-1]
-    ) * dt / time_constant
+    time = np.arange(
+        0,
+        simulation_time,
+        dt,
+    )
 
-    speed[i] = speed[i-1] + ds
+    speed = np.zeros(len(time))
 
-# -------------------------
-# Plot
-# -------------------------
+    for i in range(1, len(time)):
 
-plt.figure(figsize=(10,5))
+        ds = (
+            target_speed
+            - speed[i - 1]
+        ) * dt / time_constant
 
-plt.plot(time, speed, linewidth=2)
+        speed[i] = speed[i - 1] + ds
 
-plt.title("DC Motor Speed Response")
-plt.xlabel("Time (s)")
-plt.ylabel("Speed (RPM)")
-
-plt.grid(True)
-
-plt.savefig(
-    "images/dc_motor_speed_response.png",
-    dpi=300
-)
-
-print(f"Final Motor Speed = {speed[-1]:.1f} RPM")
-
-plt.show()
+    return (
+        time,
+        speed,
+    )
