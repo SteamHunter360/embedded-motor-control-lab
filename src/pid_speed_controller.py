@@ -61,8 +61,8 @@ def simulate_pid_speed_control(
     dt=0.01,
     time_constant=0.5,
     max_speed=1000.0,
-    kp=0.8,
-    ki=0.4,
+    kp=2.0,
+    ki=1.5,
     kd=0.05,
 ):
     validate_non_negative_number(setpoint, "setpoint")
