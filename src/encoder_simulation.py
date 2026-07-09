@@ -1,58 +1,94 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import os
-
-os.makedirs("images", exist_ok=True)
-
-# ------------------------
-# Parameters
-# ------------------------
-
-motor_speed = float(input("Enter motor speed (RPM): "))
-
-simulation_time = 5
-dt = 0.01
-
-time = np.arange(0, simulation_time, dt)
-
-encoder_resolution = 360
-
-# ------------------------
-# Calculate encoder pulses
-# ------------------------
-
-revolutions_per_second = motor_speed / 60
-
-total_revolutions = revolutions_per_second * time
-
-encoder_counts = total_revolutions * encoder_resolution
-
-# ------------------------
-# Plot
-# ------------------------
-
-plt.figure(figsize=(10,5))
-
-plt.plot(
-    time,
-    encoder_counts,
-    linewidth=2
+from src.validation import (
+    validate_non_negative_number,
+    validate_positive_number,
 )
 
-plt.title("Encoder Counts vs Time")
 
-plt.xlabel("Time (s)")
-plt.ylabel("Encoder Counts")
+def calculate_encoder_counts(
+    motor_speed,
+    time_values,
+    encoder_resolution=360,
+):
+    """
+    Calculate cumulative encoder counts.
 
-plt.grid(True)
+    Parameters
+    ----------
+    motor_speed : float
+        Motor speed in RPM.
 
-plt.savefig(
-    "images/encoder_counts.png",
-    dpi=300
-)
+    time_values : array-like
+        Simulation time values.
 
-print()
+    encoder_resolution : int
+        Encoder pulses per revolution.
 
-print(f"Final Encoder Count = {encoder_counts[-1]:.0f}")
+    Returns
+    -------
+    list
+        Encoder counts.
+    """
 
-plt.show()
+    validate_non_negative_number(
+        motor_speed,
+        "motor_speed",
+    )
+
+    validate_positive_number(
+        encoder_resolution,
+        "encoder_resolution",
+    )
+
+    revolutions_per_second = motor_speed / 60.0
+
+    encoder_counts = []
+
+    for t in time_values:
+
+        total_revolutions = revolutions_per_second * t
+
+        counts = (
+            total_revolutions
+            * encoder_resolution
+        )
+
+        encoder_counts.append(counts)
+
+    return encoder_counts
+
+
+def simulate_encoder(
+    motor_speed,
+    simulation_time=5.0,
+    dt=0.01,
+    encoder_resolution=360,
+):
+    validate_positive_number(
+        simulation_time,
+        "simulation_time",
+    )
+
+    validate_positive_number(
+        dt,
+        "dt",
+    )
+
+    num_steps = int(simulation_time / dt)
+
+    time_values = [
+        i * dt
+        for i in range(num_steps)
+    ]
+
+    encoder_counts = calculate_encoder_counts(
+        motor_speed,
+        time_values,
+        encoder_resolution,
+    )
+
+    return {
+        "time_values": time_values,
+        "encoder_counts": encoder_counts,
+        "motor_speed": motor_speed,
+        "encoder_resolution": encoder_resolution,
+    }
