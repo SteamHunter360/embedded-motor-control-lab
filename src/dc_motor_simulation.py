@@ -1,5 +1,12 @@
 import numpy as np
 
+from src.validation import (
+    validate_target_speed,
+    validate_time_step,
+    validate_simulation_time,
+    validate_time_constant,
+)
+
 
 def simulate_dc_motor(
     target_speed=1000.0,
@@ -7,6 +14,13 @@ def simulate_dc_motor(
     dt=0.01,
     time_constant=0.5,
 ):
+    
+    validate_target_speed(target_speed)
+    validate_time_step(dt)
+    validate_simulation_time(simulation_time)
+    validate_time_constant(time_constant)
+
+
     """
     Simulate the speed response of a first-order DC motor.
 

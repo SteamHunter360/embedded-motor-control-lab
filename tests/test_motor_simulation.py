@@ -26,3 +26,23 @@ def test_simulate_dc_motor_converges_toward_target_speed():
     )
 
     assert abs(speed_values[-1] - target_speed) < 1.0
+
+
+def test_simulate_dc_motor_rejects_negative_target_speed():
+    with pytest.raises(ValueError):
+        simulate_dc_motor(target_speed=-100)
+
+
+def test_simulate_dc_motor_rejects_zero_dt():
+    with pytest.raises(ValueError):
+        simulate_dc_motor(dt=0)
+
+
+def test_simulate_dc_motor_rejects_negative_simulation_time():
+    with pytest.raises(ValueError):
+        simulate_dc_motor(simulation_time=-1)
+
+
+def test_simulate_dc_motor_rejects_zero_time_constant():
+    with pytest.raises(ValueError):
+        simulate_dc_motor(time_constant=0)

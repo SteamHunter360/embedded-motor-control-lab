@@ -1,55 +1,67 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import os
+from src.dc_motor_simulation import simulate_dc_motor
+from src.validation import (
+    validate_non_negative_number,
+    validate_positive_number,
+)
 
-os.makedirs("images", exist_ok=True)
 
-# --------------------------
-# Motor Parameters
-# --------------------------
+def clamp_pwm_duty_cycle(duty_cycle):
+    if duty_cycle < 0:
+        return 0.0
 
-time_constant = 0.5
-max_speed = 1000      # RPM
-dt = 0.01
-simulation_time = 5
+    if duty_cycle > 100:
+        return 100.0
 
-time = np.arange(0, simulation_time, dt)
+    return float(duty_cycle)
 
-# User input
-duty_cycle = float(input("Enter PWM duty cycle (0-100%): "))
 
-duty_cycle = max(0, min(100, duty_cycle))
+def calculate_target_speed_from_pwm(
+    duty_cycle,
+    max_speed=1000.0,
+):
+    validate_non_negative_number(
+        duty_cycle,
+        "duty_cycle",
+    )
 
-target_speed = max_speed * (duty_cycle / 100)
+    validate_positive_number(
+        max_speed,
+        "max_speed",
+    )
 
-speed = np.zeros(len(time))
+    duty_cycle = clamp_pwm_duty_cycle(duty_cycle)
 
-# --------------------------
-# Simulation
-# --------------------------
+    return max_speed * (duty_cycle / 100.0)
 
-for i in range(1, len(time)):
 
-    speed[i] = speed[i-1] + (
-        target_speed - speed[i-1]
-    ) * dt / time_constant
+def simulate_pwm_motor_response(
+    duty_cycle,
+    max_speed=1000.0,
+    simulation_time=5.0,
+    dt=0.01,
+    time_constant=0.5,
+):
+    target_speed = calculate_target_speed_from_pwm(
+        duty_cycle,
+        max_speed,
+    )
 
-# --------------------------
-# Plot
-# --------------------------
+    time_values, speed_values = simulate_dc_motor(
+        target_speed=target_speed,
+        simulation_time=simulation_time,
+        dt=dt,
+        time_constant=time_constant,
+    )
 
-plt.figure(figsize=(10,5))
+    pwm_values = [
+        clamp_pwm_duty_cycle(duty_cycle)
+        for _ in time_values
+    ]
 
-plt.plot(time, speed, linewidth=2)
-
-plt.title(f"Motor Speed Response ({duty_cycle:.0f}% PWM)")
-plt.xlabel("Time (s)")
-plt.ylabel("Speed (RPM)")
-plt.grid(True)
-
-plt.savefig("images/pwm_motor_response.png", dpi=300)
-
-print(f"\nTarget Speed: {target_speed:.1f} RPM")
-print(f"Final Speed : {speed[-1]:.1f} RPM")
-
-plt.show()
+    return {
+        "time_values": time_values,
+        "speed_values": speed_values,
+        "pwm_values": pwm_values,
+        "target_speed": target_speed,
+        "duty_cycle": clamp_pwm_duty_cycle(duty_cycle),
+    }
