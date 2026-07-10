@@ -31,10 +31,11 @@ def main():
 
         print(f"RMS control effort: {metrics['rms_control_effort']:.4f}")
 
-plot_pid_tuning_comparison(
-    results,
-    save_path="images/pid_tuning_comparison.png",
-)
+    plot_pid_tuning_comparison(
+        results,
+        save_path="images/pid_tuning_comparison.png",
+    )
+
 
 if __name__ == "__main__":
     main()
